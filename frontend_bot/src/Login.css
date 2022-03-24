@@ -1,0 +1,24 @@
+.login{
+    text-align: center;
+    padding: 100px;
+    background-color: white;
+    box-shadow: 0 1px 10px #888888;
+}
+
+.login__logo{
+    width: 100px;
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+.login > button{
+    margin: 20px 0;
+    background-color:#28B840;
+    text-transform: inherit;
+    color: white;
+    transition: .4s ;
+}
+.login > button:hover{
+    background-color: #52CF60 !important;
+    color:black;
+}
