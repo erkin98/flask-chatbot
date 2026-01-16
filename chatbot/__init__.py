@@ -1,20 +1,27 @@
+from __future__ import annotations
+
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+
 from chatbot.config import Config
+from chatbot.extensions import db, migrate
 
 
-db = SQLAlchemy()
-migrate = Migrate(db)
+def create_app(config_class: type[Config] = Config) -> Flask:
+    """
+    Flask application factory.
 
+    Keeps side effects out of import-time so tooling (migrations/tests) behaves well.
+    """
 
-
-def create_app(config_class = Config):
-    app = Flask(__name__,static_folder="../frontend_bot/build/static",template_folder="../frontend_bot/build")
-    app.config.from_object(Config)
+    app = Flask(
+        __name__,
+        static_folder="../frontend_bot/build/static",
+        template_folder="../frontend_bot/build",
+    )
+    app.config.from_object(config_class)
 
     db.init_app(app)
-    migrate.init_app(app)
+    migrate.init_app(app, db)
 
     from chatbot.bot.routes import bots
     from chatbot.customers.routes import customers

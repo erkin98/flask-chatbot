@@ -1,7 +1,9 @@
 # from chatbot.models import Customer,Message, Response
-from flask import request, Blueprint
+from __future__ import annotations
+
+from flask import Blueprint, current_app, request
 from twilio.twiml.messaging_response import MessagingResponse
-from chatbot import db
+from chatbot.extensions import db
 from chatbot.models import Customer
 import datetime
 
@@ -11,21 +13,16 @@ bots = Blueprint('bots', __name__)
 
 @bots.route('/bot', methods=['POST'])
 def bot():
-    incoming_msg = request.values.get('Body').lower()
-    sender_num = request.values.get('From').lower()
-    date = request.values.get('MessageSid')
-    print(date)
-    if not (bool(Customer.query.filter_by(sender=sender_num).first())):
-        # db.drop_all()
-        # db.create_all()
-        send_id = Customer(sender=sender_num)
-        db.session.add(send_id)
+    incoming_msg = (request.values.get("Body") or "").strip().lower()
+    sender_num = (request.values.get("From") or "").strip().lower()
+
+    if sender_num and Customer.query.filter_by(sender=sender_num).first() is None:
+        db.session.add(Customer(sender=sender_num))
         db.session.commit()
+
     resp = MessagingResponse()
     msg = resp.message()
     responded = False
-
-    countries = {k.lower(): v.lower() for k, v in countries.items()}
 
     if 'salam' in incoming_msg:
         quote = '\'Salam.Siz chatbot ilə əlaqədəsiniz.Sizə necə kömək edə bilərik?\''
@@ -38,5 +35,9 @@ def bot():
     # o_id = Response(our_id = 'Azeri Student')
     # db.session.add(o_id)
     # db.session.commit()
-    print(datetime.datetime.now())
+    if not responded:
+        # Keep a polite default reply instead of returning an empty TwiML message.
+        msg.body("Mesajınızı aldıq. Zəhmət olmasa sualınızı dəqiqləşdirin.")
+
+    current_app.logger.info("Bot message processed at %s", datetime.datetime.now().isoformat())
     return str(resp)

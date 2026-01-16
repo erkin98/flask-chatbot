@@ -1,3 +1,4 @@
-from run import app
-if __name__ == "__main__":
-    app.run()
+from chatbot import create_app
+
+# Used by production servers (e.g. gunicorn) as `wsgi:app`.
+app = create_app()
