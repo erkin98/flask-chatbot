@@ -1,4 +1,6 @@
-from chatbot import db
+from __future__ import annotations
+
+from chatbot.extensions import db
 
 
 class Customer(db.Model):
